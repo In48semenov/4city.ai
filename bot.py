@@ -69,12 +69,12 @@ async def handle_docs_photo(message):
         await message.photo[-1].download(
             destination_file=photo_name)
         logging.debug(f"Get foto from {user_id}")
-        keyboard_menu_options = [messages['signage_1'],
-                                 messages['signage_2'],
-                                 messages['signage_3'],
-                                 messages['signage_4']]
+        keyboard_menu_options = [messages['signage_1']['name'],
+                                 messages['signage_2']['name'],
+                                 messages['signage_3']['name'],
+                                 messages['signage_4']['name']]
         keyboard_menu = generate_menu(keyboard_menu_options)
-        await message.answer("Выберите вывеску", reply_markup=keyboard_menu)
+        await message.answer("Выберите вывеску, котрую хотите добавить на фото", reply_markup=keyboard_menu)
         photo = cv2.imread(photo_name, cv2.COLOR_BGR2RGB)
         photo_output, text = model(photo)
         logging.debug(f"Get foto from {photo_output}")
