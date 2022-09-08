@@ -1,5 +1,5 @@
-opencv-python-headless==4.5.4.60
-torch==1.12.0
-numpy==1.17.4
-aiogram==2.21
-python-dotenv==0.19.0
+opencv-python-headless
+easyocr==1.5.0
+pyyaml
+aiogram
+python-dotenv
