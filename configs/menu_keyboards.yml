@@ -1,5 +1,12 @@
-signage_1: "Булочная"
-signage_2: "Магнит"
-signage_3: "Мужская одежда"
-signage_4: "Магазин кухонной посуды"
-
+signage_1:
+  name: "Булочная"
+  image: "src/images/bulochnaya.jpg"
+signage_2:
+  name: "Магнит"
+  image: "src/images/magnit.jpg"
+signage_3:
+  name: "Мужская одежда"
+  image: "src/images/odezhda.jpg"
+signage_4:
+  name: "Магазин кухонной посуды"
+  image: "src/images/posuda.jpg"
