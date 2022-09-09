@@ -76,18 +76,15 @@ class EasyOCRModel:
             )
 
             numpy_image = cv2.inpaint(img, mask, 7, cv2.INPAINT_NS)
-            # cv2.imwrite("temp.jpg", numpy_image)
-            # img = Image.open("temp.jpg")
-            # img = Image.fromarray(np.uint8(numpy_image)).convert('RGB')
-            # draw = ImageDraw.Draw(img)
-            # font = ImageFont.truetype("fonts/RedOctober.ttf", 32)
-            # draw.text((x0, y0 - 20), "Печатный двор", (0, 0, 0), font=font)
 
-            # img = np.array(img)
+            x = self.preds[1][0][0][0]
+            y = self.preds[1][0][0][-1]
+            numpy_image[y:y + self.signage_name_photo.shape[0], 450:450 + self.signage_name_photo.shape[1]] = self.signage_name_photo
+
 
         return numpy_image
 
-    def __call__(self, image) -> str:
+    def __call__(self, image, signage_name) -> str:
         """
         Извлечение текстов из изображения
 
@@ -98,14 +95,15 @@ class EasyOCRModel:
             str: Извлеченный текст из изображения
         """
 
-        preds = self._infer(image)
+        self.signage_name_photo =  cv2.imread(signage_name)
+        self.preds = self._infer(image)
 
-        if len(preds) > 0:
-            img = self._inpaint_text(image, preds)
+        if len(self.preds) > 0:
+            img = self._inpaint_text(image, self.preds)
             _, img = cv2.imencode('.jpg', img)
             image_output = io.BytesIO(img)
             image_output.name = 'image.jpg'
             image_output.seek(0)
-            return image_output, preds  # М.б. Нужен текст, он лежит в preds
+            return image_output, self.preds  # М.б. Нужен текст, он лежит в preds
         else:
             return None

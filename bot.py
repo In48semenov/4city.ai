@@ -28,7 +28,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 model = EasyOCRModel()
 keyboard_menu_options = list(messages.keys())
-
+photo_name = ""
 
 def generate_menu(options: list) -> types.ReplyKeyboardMarkup:
     buttons = [
@@ -65,11 +65,15 @@ async def handle_docs_photo(message):
 
 @dp.message_handler(content_types=["text"])
 async def text_input(message):
+    signage = message.text
+    chat_id = message.chat.id
     if message.text in keyboard_menu_options:
         logging.debug(open(messages[message.text]["image"], 'rb'))
-        _, img = cv2.imencode('.jpg', messages[message.text]["image"])
-        image_output = io.BytesIO(img)
-        await bot.send_photo(message.chat.id, photo=open(image_output, 'rb'))
+        photo = cv2.imread(photo_name, cv2.COLOR_BGR2RGB)
+        photo_output, text = model(photo, messages[message.text]["image"])
+        logging.debug(f"Get foto from {chat_id}")
+        await bot.send_photo(chat_id, photo_output)
+        await bot.send_photo(message.chat.id, photo=open(photo_output, 'rb'))
 
 
 @dp.message_handler(content_types=['photo'])
@@ -84,16 +88,13 @@ async def handle_docs_photo(message):
         logging.info(f'{user_name, user_id} is knocking to our bot')
         await bot.send_message(chat_id, text)
 
+        global photo_name
         photo_name = './input/photo_%s_%s.jpg' % (user_id, message_id)
         await message.photo[-1].download(
             destination_file=photo_name)
         logging.debug(f"Get foto from {user_id}")
         keyboard_menu = generate_menu(keyboard_menu_options)
         await message.answer("Выберите вывеску, котрую хотите добавить на фото", reply_markup=keyboard_menu)
-        photo = cv2.imread(photo_name, cv2.COLOR_BGR2RGB)
-        photo_output, text = model(photo)
-        logging.debug(f"Get foto from {photo_output}")
-        await bot.send_photo(chat_id, photo_output)
         # await bot.send_message(chat_id, output_text)
 
     else:
