@@ -1,15 +1,10 @@
+import io
+import math
 from typing import List
 
 import cv2
 import easyocr
-import math
 import numpy as np
-import io
-
-
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw
 
 
 class EasyOCRModel:
@@ -90,9 +85,7 @@ class EasyOCRModel:
 
             # img = np.array(img)
 
-
         return numpy_image
-
 
     def __call__(self, image) -> str:
         """

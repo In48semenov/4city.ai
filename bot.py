@@ -4,8 +4,10 @@ import logging
 import logging.config
 import os
 import cv2
+import io
 
 import yaml
+from aiogram.dispatcher.filters import Text
 from aiogram import Bot, Dispatcher, executor, types
 from dotenv import load_dotenv
 
@@ -25,6 +27,7 @@ TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 model = EasyOCRModel()
+keyboard_menu_options = list(messages.keys())
 
 
 def generate_menu(options: list) -> types.ReplyKeyboardMarkup:
@@ -53,6 +56,22 @@ async def handle_docs_photo(message):
     await message.reply(text)
 
 
+@dp.message_handler(content_types=NON_TARGET_CONTENT_TYPES)
+async def handle_docs_photo(message):
+    user_name = message.from_user.first_name
+    text = NON_TARGET_TEXT % user_name
+    await message.reply(text)
+
+
+@dp.message_handler(content_types=["text"])
+async def text_input(message):
+    if message.text in keyboard_menu_options:
+        logging.debug(open(messages[message.text]["image"], 'rb'))
+        _, img = cv2.imencode('.jpg', messages[message.text]["image"])
+        image_output = io.BytesIO(img)
+        await bot.send_photo(message.chat.id, photo=open(image_output, 'rb'))
+
+
 @dp.message_handler(content_types=['photo'])
 async def handle_docs_photo(message):
     chat_id = message.chat.id
@@ -69,10 +88,6 @@ async def handle_docs_photo(message):
         await message.photo[-1].download(
             destination_file=photo_name)
         logging.debug(f"Get foto from {user_id}")
-        keyboard_menu_options = [messages['signage_1']['name'],
-                                 messages['signage_2']['name'],
-                                 messages['signage_3']['name'],
-                                 messages['signage_4']['name']]
         keyboard_menu = generate_menu(keyboard_menu_options)
         await message.answer("Выберите вывеску, котрую хотите добавить на фото", reply_markup=keyboard_menu)
         photo = cv2.imread(photo_name, cv2.COLOR_BGR2RGB)
