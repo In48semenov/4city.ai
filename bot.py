@@ -3,9 +3,9 @@
 import logging
 import logging.config
 import os
-import cv2
-import io
+from dataclasses import dataclass
 
+import cv2
 import yaml
 from aiogram import Bot, Dispatcher, executor, types
 from dotenv import load_dotenv
@@ -27,7 +27,15 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 model = EasyOCRModel()
 keyboard_menu_options = list(messages.keys())
-photo_name = ""
+photo_dataclass_dict = {}
+
+
+@dataclass
+class PhotoName:
+    chat_id: int
+    message_id: int
+    photo_path: str
+
 
 def generate_menu(options: list) -> types.ReplyKeyboardMarkup:
     buttons = [
@@ -61,7 +69,7 @@ async def text_input(message):
     chat_id = message.chat.id
     if message.text in keyboard_menu_options:
         logging.debug(open(messages[signage]["image"], 'rb'))
-        photo = cv2.imread(photo_name, cv2.COLOR_BGR2RGB)
+        photo = cv2.imread(photo_dataclass_dict[chat_id].photo_path, cv2.COLOR_BGR2RGB)
         photo_output, text_output = model(photo, messages[message.text]["image"])
         logging.debug(f"Get foto from {chat_id}")
         if text_output:
@@ -83,10 +91,14 @@ async def handle_docs_photo(message):
         logging.info(f'{user_name, user_id} is knocking to our bot')
         await bot.send_message(chat_id, text)
 
-        global photo_name
-        photo_name = './input/photo_%s_%s.jpg' % (user_id, message_id)
+        global photo_dataclass_dict
+        photo_dataclass_dict[chat_id] = PhotoName(chat_id=chat_id,
+                                                  message_id=message_id,
+                                                  photo_path= './input/photo_%s_%s.jpg' % (user_id, message_id))
+
         await message.photo[-1].download(
-            destination_file=photo_name)
+            destination_file=photo_dataclass_dict[chat_id].photo_path)
+
         logging.debug(f"Get foto from {user_id}")
         keyboard_menu = generate_menu(keyboard_menu_options)
         await message.answer("Выберите вывеску, котрую хотите добавить на фото", reply_markup=keyboard_menu)
