@@ -13,8 +13,6 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-RUN pip install 'git+https://github.com/facebookresearch/detectron2.git'
-
 COPY . .
 
 CMD python3 bot.py
