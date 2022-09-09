@@ -60,26 +60,40 @@ class EasyOCRModel:
 
     def _inpaint_text(self, img, result):
         mask = np.zeros(img.shape[:2], dtype="uint8")
-        for boxs in result:
-            x0, y0 = boxs[0][3]
-            x1, y1 = boxs[0][1]
-            x2, y2 = boxs[0][2]
-            x3, y3 = boxs[0][0]
 
-            x_mid0, y_mid0 = self._midpoint(x1, y1, x2, y2)
-            x_mid1, y_mi1 = self._midpoint(x0, y0, x3, y3)
+        max_sq = 0
+        for bbox in result:
+            coords = bbox[0]
+            curr_sq = (coords[1][0] - coords[0][0]) * (coords[2][1] - coords[1][1])
+            if max_sq < curr_sq:
+                max_sq = curr_sq
+                max_preds = bbox
+                width = coords[1][0] - coords[0][0]
+                height = coords[2][1] - coords[1][1]
 
-            thickness = int(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
+        x0, y0 = max_preds[0][3]
+        x1, y1 = max_preds[0][1]
+        x2, y2 = max_preds[0][2]
+        x3, y3 = max_preds[0][0]
 
-            cv2.line(
-                mask, (x_mid0, y_mid0), (x_mid1, y_mi1), 255, thickness
-            )
+        x_mid0, y_mid0 = self._midpoint(x1, y1, x2, y2)
+        x_mid1, y_mi1 = self._midpoint(x0, y0, x3, y3)
 
-            numpy_image = cv2.inpaint(img, mask, 7, cv2.INPAINT_NS)
+        thickness = int(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
 
-            x = self.preds[1][0][0][0]
-            y = self.preds[1][0][0][-1]
-            numpy_image[y:y + self.signage_name_photo.shape[0], 450:450 + self.signage_name_photo.shape[1]] = self.signage_name_photo
+        cv2.line(
+            mask, (x_mid0, y_mid0), (x_mid1, y_mi1), 255, thickness
+        )
+
+        numpy_image = cv2.inpaint(img, mask, 7, cv2.INPAINT_NS)
+
+        x = max_preds[0][0][0]
+        y = max_preds[0][0][-1]
+        self.signage_name_photo = cv2.resize(
+            self.signage_name_photo, (width, height)
+        )
+
+        numpy_image[y:y + self.signage_name_photo.shape[0], x:x + self.signage_name_photo.shape[1]] = self.signage_name_photo
 
 
         return numpy_image

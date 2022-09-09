@@ -11,4 +11,4 @@ NON_TARGET_CONTENT_TYPES = [
     'channel_chat_created',
     'migrate_to_chat_id', 'migrate_from_chat_id', 'pinned_message'
 ]
-NON_LABELS_TEXT = "\U0001f972 Кажется, на фотографии вывесок. Ппоробуй другое фото."
+NON_LABELS_TEXT = "\U0001f972 Кажется, на фотографии вывесок. Попробуй другое фото."

@@ -7,7 +7,6 @@ import cv2
 import io
 
 import yaml
-from aiogram.dispatcher.filters import Text
 from aiogram import Bot, Dispatcher, executor, types
 from dotenv import load_dotenv
 
@@ -56,13 +55,6 @@ async def handle_docs_photo(message):
     await message.reply(text)
 
 
-@dp.message_handler(content_types=NON_TARGET_CONTENT_TYPES)
-async def handle_docs_photo(message):
-    user_name = message.from_user.first_name
-    text = NON_TARGET_TEXT % user_name
-    await message.reply(text)
-
-
 @dp.message_handler(content_types=["text"])
 async def text_input(message):
     signage = message.text
@@ -70,10 +62,13 @@ async def text_input(message):
     if message.text in keyboard_menu_options:
         logging.debug(open(messages[signage]["image"], 'rb'))
         photo = cv2.imread(photo_name, cv2.COLOR_BGR2RGB)
-        photo_output, text = model(photo, messages[message.text]["image"])
+        photo_output, text_output = model(photo, messages[message.text]["image"])
         logging.debug(f"Get foto from {chat_id}")
-        await bot.send_photo(chat_id, photo_output)
-        await bot.send_photo(message.chat.id, photo=open(photo_output, 'rb'))
+        if text_output:
+            await bot.send_photo(chat_id, photo_output)
+            await bot.send_photo(message.chat.id, photo=open(photo_output, 'rb'))
+        else:
+            await bot.send_message(chat_id, NON_LABELS_TEXT)
 
 
 @dp.message_handler(content_types=['photo'])
