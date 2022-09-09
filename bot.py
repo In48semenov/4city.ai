@@ -68,7 +68,7 @@ async def text_input(message):
     signage = message.text
     chat_id = message.chat.id
     if message.text in keyboard_menu_options:
-        logging.debug(open(messages[message.text]["image"], 'rb'))
+        logging.debug(open(messages[signage]["image"], 'rb'))
         photo = cv2.imread(photo_name, cv2.COLOR_BGR2RGB)
         photo_output, text = model(photo, messages[message.text]["image"])
         logging.debug(f"Get foto from {chat_id}")
