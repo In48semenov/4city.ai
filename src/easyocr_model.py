@@ -5,7 +5,7 @@ from typing import List
 import cv2
 import easyocr
 import numpy as np
-
+import uuid
 
 class EasyOCRModel:
     """
@@ -71,21 +71,21 @@ class EasyOCRModel:
                 width = coords[1][0] - coords[0][0]
                 height = coords[2][1] - coords[1][1]
 
-        x0, y0 = max_preds[0][3]
-        x1, y1 = max_preds[0][1]
-        x2, y2 = max_preds[0][2]
-        x3, y3 = max_preds[0][0]
+            x0, y0 = coords[3]
+            x1, y1 = coords[1]
+            x2, y2 = coords[2]
+            x3, y3 = coords[0]
 
-        x_mid0, y_mid0 = self._midpoint(x1, y1, x2, y2)
-        x_mid1, y_mi1 = self._midpoint(x0, y0, x3, y3)
+            x_mid0, y_mid0 = self._midpoint(x1, y1, x2, y2)
+            x_mid1, y_mi1 = self._midpoint(x0, y0, x3, y3)
 
-        thickness = int(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
+            thickness = int(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
 
-        cv2.line(
-            mask, (x_mid0, y_mid0), (x_mid1, y_mi1), 255, thickness
-        )
+            cv2.line(
+                mask, (x_mid0, y_mid0), (x_mid1, y_mi1), 255, thickness
+            )
 
-        numpy_image = cv2.inpaint(img, mask, 7, cv2.INPAINT_NS)
+            numpy_image = cv2.inpaint(img, mask, 7, cv2.INPAINT_NS)
 
         x = max_preds[0][0][0]
         y = max_preds[0][0][-1]
@@ -116,7 +116,7 @@ class EasyOCRModel:
             img = self._inpaint_text(image, self.preds)
             _, img = cv2.imencode('.jpg', img)
             image_output = io.BytesIO(img)
-            image_output.name = 'image.jpg'
+            image_output.name = f'{uuid.uuid4()}.jpg'
             image_output.seek(0)
             return image_output, self.preds  # М.б. Нужен текст, он лежит в preds
         else:
