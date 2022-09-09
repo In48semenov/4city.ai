@@ -93,6 +93,12 @@ class EasyOCRModel:
             self.signage_name_photo, (width, height)
         )
 
+        if x + self.signage_name_photo.shape[1] > numpy_image.shape[1]:
+            x = numpy_image.shape[1] - self.signage_name_photo.shape[1]
+
+        if y + self.signage_name_photo.shape[0] > numpy_image.shape[0]:
+            y = numpy_image.shape[0] - self.signage_name_photo.shape[0]
+
         numpy_image[y:y + self.signage_name_photo.shape[0], x:x + self.signage_name_photo.shape[1]] = self.signage_name_photo
 
 
@@ -120,4 +126,4 @@ class EasyOCRModel:
             image_output.seek(0)
             return image_output, self.preds  # М.б. Нужен текст, он лежит в preds
         else:
-            return None
+            return None, None
